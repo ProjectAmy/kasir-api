@@ -9,35 +9,31 @@ import (
 )
 
 type Produk struct {
-	ID    int    `json:"id"`
-	Nama  string `json:"nama"`
-	Harga int    `json:"harga"`
-	Stok  int    `json:"stok"`
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 var produk = []Produk{
 	{
-		ID:    1,
-		Nama:  "Baju",
-		Harga: 10000,
-		Stok:  10,
+		ID:          1,
+		Name:        "Baju",
+		Description: "Benda untuk dipakai di badan",
 	},
 	{
-		ID:    2,
-		Nama:  "Celana",
-		Harga: 20000,
-		Stok:  20,
+		ID:          2,
+		Name:        "Celana",
+		Description: "benda untuk dipakai di badan bagian bawah",
 	},
 	{
-		ID:    3,
-		Nama:  "Jaket",
-		Harga: 25000,
-		Stok:  15,
+		ID:          3,
+		Name:        "Jaket",
+		Description: "benda untuk dipakai di badan bagian atas dan menutupi tangan",
 	},
 }
 
 func getProdukById(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
+	idStr := strings.TrimPrefix(r.URL.Path, "/categories/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "invalid Produk ID", http.StatusBadRequest)
@@ -56,7 +52,7 @@ func getProdukById(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateProduk(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
+	idStr := strings.TrimPrefix(r.URL.Path, "/categories/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "invalid Produk ID", http.StatusBadRequest)
@@ -81,12 +77,10 @@ func updateProduk(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	
-
 }
 
 func deleteProduk(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
+	idStr := strings.TrimPrefix(r.URL.Path, "/categories/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "invalid Produk ID", http.StatusBadRequest)
@@ -96,6 +90,12 @@ func deleteProduk(w http.ResponseWriter, r *http.Request) {
 	for i, p := range produk {
 		if p.ID == id {
 			produk = append(produk[:i], produk[i+1:]...)
+
+			// Re-index IDs so they are sequential
+			for j := range produk {
+				produk[j].ID = j + 1
+			}
+
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]string{
 				"message": "Produk berhasil dihapus",
@@ -109,7 +109,7 @@ func deleteProduk(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// GET api produk detail
-	http.HandleFunc("/api/produk/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/categories/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			getProdukById(w, r)
 		} else if r.Method == "PUT" {
@@ -121,7 +121,7 @@ func main() {
 
 	// GET api-produk
 
-	http.HandleFunc("/api/produk", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(produk)
