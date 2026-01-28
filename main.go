@@ -8,12 +8,15 @@ import (
 	"strings"
 )
 
+// database model
 type Produk struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
 
+
+// masukin ke database
 var produk = []Produk{
 	{
 		ID:          1,
@@ -33,17 +36,17 @@ var produk = []Produk{
 }
 
 func getProdukById(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/categories/")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
+	idStr := strings.TrimPrefix(r.URL.Path, "/categories/") // mengembalikan angka setelah path
+	id, err := strconv.Atoi(idStr) // Atoi mengembalikan 2 value jadi butuh 2 variable
+	if err != nil {  // bukan nil berarti ada error, jika ada error
 		http.Error(w, "invalid Produk ID", http.StatusBadRequest)
 		return
 	}
 
-	for _, p := range produk {
+	for _, p := range produk { // loop for range, abaikan index karena hanya untuk copy
 		if p.ID == id {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(p)
+			w.Header().Set("Content-Type", "application/json") // menulis respon header
+			json.NewEncoder(w).Encode(p) // jadikan bentuk json
 			return
 		}
 	}
@@ -67,7 +70,7 @@ func updateProduk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for i := range produk {
+	for i := range produk { // ini for loop untuk merubah karena pake i - index
 		if produk[i].ID == id {
 			updateProduk.ID = id
 			produk[i] = updateProduk
@@ -91,7 +94,7 @@ func deleteProduk(w http.ResponseWriter, r *http.Request) {
 		if p.ID == id {
 			produk = append(produk[:i], produk[i+1:]...)
 
-			// Re-index IDs so they are sequential
+			// index diset ulang
 			for j := range produk {
 				produk[j].ID = j + 1
 			}
